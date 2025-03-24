@@ -36,9 +36,74 @@ def tokenize_and_lemmatize(text):
 def correct_text(text):
     spell = SpellChecker(language='pt')
     words = text.split()
-    corrected_words = [spell.correction(word) if spell.correction(word) is not None else word for word in words]
-    corrected_text = ' '.join(corrected_words)
-    return corrected_text
+    # Regex patterns for protected elements
+    # Regex patterns for protected elements
+    protected_patterns = [
+        r'\b[A-Z]{2,}\b',          # Acronyms
+        r'\d+',                     # Numbers
+        r'[A-Z][a-z]+',             # Proper nouns
+        r'[.,:;!?]+',               # Punctuation
+        r'[()\[\]{}"\'<>]+',        # Symbols
+        r'\b\w+-\w+\b',             # Hyphenated words
+        r'\d+/\d+(?:/\d+)?'         # Dates (25/01 or 25/01/2023)
+    ]
+    protected_regex = re.compile('|'.join(protected_patterns))
+    
+    # Enhanced tokenizer pattern
+    token_pattern = r'''
+        \w+-\w+|                    # Hyphenated words
+        \w+(?:'\w+)?|               # Words with apostrophes
+        [.,:;!?()\[\]{}"\'<>]|      # Punctuation/symbols
+        \s                           # Whitespace
+    '''
+    tokens = re.findall(token_pattern, text, re.VERBOSE)
+    corrected_tokens = []
+    
+    for token in tokens:
+        # Skip whitespace and protected elements
+        if token.isspace() or protected_regex.fullmatch(token):
+            corrected_tokens.append(token)
+            continue
+            
+        # Handle hyphenated words specially
+        if '-' in token:
+            parts = token.split('-')
+            corrected_parts = []
+            for part in parts:
+                if part in spell or len(part) < 4:
+                    corrected_parts.append(part)
+                else:
+                    correction = spell.correction(part)
+                    if correction and sum(a == b for a, b in zip(part.lower(), correction.lower())) / len(part) > 0.6:
+                        corrected_parts.append(correction)
+                    else:
+                        corrected_parts.append(part)
+            corrected_token = '-'.join(corrected_parts)
+            corrected_tokens.append(corrected_token)
+            continue
+            
+        # Check if word is in dictionary
+        if token in spell:
+            corrected_tokens.append(token)
+            continue
+            
+        # Get correction with confidence check
+        correction = spell.correction(token)
+        
+        # Only apply correction if confident
+        if (correction and 
+            len(token) > 3 and
+            sum(a == b for a, b in zip(token.lower(), correction.lower())) / len(token) > 0.5):
+            
+            # Preserve original capitalization
+            if token[0].isupper():
+                correction = correction.capitalize()
+            corrected_tokens.append(correction)
+        else:
+            corrected_tokens.append(token)
+    
+    # Reconstruct text with original formatting
+    return ''.join(corrected_tokens)
 
 # Calculate difference between original and corrected text
 def calculate_difference(original_text, corrected_text):
@@ -50,11 +115,11 @@ def calculate_difference(original_text, corrected_text):
 
 # Classify text quality based on difference percentage
 def classify_text_quality(difference_percentage):
-    if difference_percentage < 5:
+    if difference_percentage < 2:
         return "Excellent"
-    elif difference_percentage < 10:
+    elif difference_percentage < 5:
         return "Good"
-    elif difference_percentage < 15:
+    elif difference_percentage < 10:
         return "Fair"
     else:
         return "Poor"

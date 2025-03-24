@@ -126,8 +126,8 @@ def main():
                     low_color="#1B8720",  # Green for good quality
                     mid_color="#FF9400",  # Orange for fair quality
                     high_color="#FF1708",  # Red for poor quality
-                    low_range=0.29,  # Low range threshold
-                    mid_range=0.69,  # Mid range threshold
+                    low_range=0.05, # Low range threshold
+                    mid_range=0.1,  # Mid range threshold
                     theme="White"
                 )
 
