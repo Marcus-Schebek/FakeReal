@@ -98,20 +98,6 @@ def main():
             # Display results
             st.subheader("Results:")
 
-            # Show debug information
-            with st.expander("Debug Information"):
-                st.subheader("Original Text")
-                st.write(text_to_analyze)
-                
-                st.subheader("Corrected Text")
-                st.write(corrected_text)
-                
-                st.subheader("Differences Highlighted")
-                st.markdown(highlight_differences(text_to_analyze, corrected_text), unsafe_allow_html=True)
-                
-                st.subheader("Text Quality Metrics")
-                st.write(f"Difference Percentage: {difference_percentage:.2f}%")
-                st.write(f"Quality Classification: {quality_classification}")
 
             # Create two columns for the gauges
             col1, col2 = st.columns(2)
@@ -145,6 +131,21 @@ def main():
                     mid_range=0.69,  # Mid range threshold
                     theme="White"
                 )
+                            # Show debug information
+            with st.expander("Debug Information"):
+                st.subheader("Original Text")
+                st.write(text_to_analyze)
+                
+                st.subheader("Corrected Text")
+                st.write(corrected_text)
+                
+                st.subheader("Differences Highlighted")
+                st.markdown(highlight_differences(text_to_analyze, corrected_text), unsafe_allow_html=True)
+                
+                st.subheader("Text Quality Metrics")
+                st.write(f"Difference Percentage: {difference_percentage:.2f}%")
+                st.write(f"Quality Classification: {quality_classification}")
+
 
 # Run the Streamlit app
 if __name__ == "__main__":
