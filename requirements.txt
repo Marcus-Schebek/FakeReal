@@ -13,3 +13,4 @@ pyspellchecker
 wordcloud
 Pillow
 plotly
+streamviz
